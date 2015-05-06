@@ -11,8 +11,9 @@
   },
   "dependencies": {
     "express": "~4.12.3",
+    "express-ws": "~0.2.6",
     "lodash": "~3.8.0",
-    "websocket": "~1.0.18"
+    "ws": "~0.7.1"
   },
   "license": "MIT",
   "author": "Noam Ben-Ami <noam.benami@mulesoft.com>"
