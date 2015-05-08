@@ -53,12 +53,12 @@ module.exports =
         // is completely stateless by design: We do not keep a current
         // item but always calculate the correct one.
         var time = date.getTime();
-        var startTime = getStartTime(schedule);
+        var startTime = getStartTime(date, schedule);
         var i = 0;
         while (time < startTime) {
           // Fast forward by the duration of the display
-          i++;
           time += schedule.displays[i].duration * 1000;
+          i = (i++) % schedule.displays.length;
         }
         return schedule.displays[i];
       },
@@ -85,10 +85,9 @@ module.exports =
 
     /**
      * @returns {number} Javascript ms time value for the schedule start
-     * time today.
+     * time on the passed-in date;
      */
-    function getStartTime(schedule) {
-      var startDate = new Date();
+    function getStartTime(date, schedule) {
 
       // Here is the tricksy bit: The default schedule has no start time,
       // so if there are scheduled items, we use the end time of the last
@@ -110,12 +109,15 @@ module.exports =
             if (s.hours > r.hours && s.minutes > r.minutes) {
               return s;
             }
+            return r;
           }, config.schedules[0]);
 
           scheduleStart = lastDisplay.end;
         }
       }
 
+      // Do not modify the passed-in date, so clone it instead
+      var startDate = new Date(date.getTime());
       startDate.setHours(scheduleStart.hours);
       startDate.setMinutes(scheduleStart.minutes);
       return startDate.getTime();
