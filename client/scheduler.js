@@ -39,6 +39,8 @@
 module.exports =
   function createScheduler(config) {
 
+    TODO: need many tests for this scheduler
+
     return {
 
       /**

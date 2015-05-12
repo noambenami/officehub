@@ -15,6 +15,14 @@
     "lodash": "~3.8.0",
     "ws": "~0.7.1"
   },
+  "devDependencies": {
+    "chai": "~2.3.0",
+    "grunt-karma": "~0.10.1",
+    "karma": "~0.12.31",
+    "karma-chrome-launcher": "^0.1.10",
+    "karma-mocha": "^0.1.10",
+    "mocha": "~2.2.4"
+  },
   "license": "MIT",
   "author": "Noam Ben-Ami <noam.benami@mulesoft.com>"
 }
