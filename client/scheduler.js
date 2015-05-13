@@ -3,11 +3,10 @@
  * schedule: It figures out what the piece of content that should
  * be shown next based on the data in the schedule.
  *
- * A schedule configuration looks like this:
+ * A schedule configuration looks like this. Note that the default schedule
+ * does not have nor need a start/end time.
  * {
  *  default: {
-      start: { hours: 11, minutes: 30 }
- *    end:  { hours: 13, minutes: 0 }
  *    displays: [
  *      { url: foo, duration: 30 seconds },
  *      { markdown: bar, duration: 60 seconds, transition: fade }
@@ -39,8 +38,6 @@
 module.exports =
   function createScheduler(config) {
 
-    TODO: need many tests for this scheduler
-
     return {
 
       /**
@@ -54,31 +51,46 @@ module.exports =
         // from the start time of the schedule. Note that this scheduler
         // is completely stateless by design: We do not keep a current
         // item but always calculate the correct one.
-        var time = date.getTime();
-        var startTime = getStartTime(date, schedule);
-        var i = 0;
-        while (time < startTime) {
-          // Fast forward by the duration of the display
-          time += schedule.displays[i].duration * 1000;
-          i = (i++) % schedule.displays.length;
-        }
-        return schedule.displays[i];
+        var time          = date.getTime();
+        var startTime     = getStartTime(date, schedule);
+        var ellapsedMs    = (time - startTime) % getScheduleLengthMs(schedule);
+        return _.find(schedule.displays, function (display) {
+          // Advance a display at a time. Note that we're assuming that we'll
+          // end up inside a display because getSchedule should return a
+          // schedule that we are in and because ellapsedMs has already been
+          // modded against the duration of the schedule above.
+          ellapsedMs -= display.duration * 1000;
+          if (ellapsedMs <= 0) {
+            return true;
+          }
+        });
       },
 
       /**
        * Get the schedule at the given time. If no schedule is defined
        * for the given time, will return the default schedule.
+       *
+       * Now, note that schedules can be nested, so we can schedule stuff
+       * from 12-5, as well as stuff from 1-2 and stuff from 1:30-1.45.
+       * So the correct schedule is the latest one of any that matches.
+       * E.g. at 1.31, the 1.30 schedule should match.
        */
       getSchedule: function (date) {
         var hour   = date.getHours();   // 0 - 23
         var minute = date.getMinutes(); // 0 - 59
 
-        var schedule = _.find(config.schedules, function(schedule) {
-          return schedule.start.hours <= hour
-          && schedule.start.minutes <= minute
-          && schedule.end.hours >= hour
-          && schedule.end.minutes > minute; // End minutes non-inclusive.
-        });
+        var schedule = _.chain(config.schedules)
+          .where(function(schedule) {
+            return schedule.start.hours <= hour
+            && schedule.start.minutes <= minute
+            && schedule.end.hours >= hour
+            && schedule.end.minutes > minute; // End minutes non-inclusive.
+          })
+          .max(function (schedule) {
+            // Get the last of the matching schedules by converting
+            // the start time to a decimal, e.g. 13.50 for 1.30pm.
+            return schedule.start.hours + schedule.start.minutes/60.0;
+          });
 
         return schedule || config.default;
       }
@@ -123,6 +135,17 @@ module.exports =
       startDate.setHours(scheduleStart.hours);
       startDate.setMinutes(scheduleStart.minutes);
       return startDate.getTime();
+    }
+
+    // Private utility functions
+
+    /**
+     * @returns {number} Duration of the schedule in milliseconds
+     */
+    function getScheduleLengthMs(schedule) {
+      return _.sum(schedule.displays, function(display) {
+        return display.duration * 1000;
+      });
     }
 
   };
