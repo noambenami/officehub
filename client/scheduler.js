@@ -16,8 +16,8 @@
  *  schedules: [
  *  {
  *    name: "lunch announcements"
- *    start: { hours: 11, minutes: 30 }
- *    end:  { hours: 13, minutes: 0 }
+ *    start: 11.30
+ *    end:  13
  *    displays: [
  *      { url: foo, duration: 30 seconds },
  *      { markdown: bar, duration: 60 seconds, transition: fade }
@@ -37,6 +37,9 @@
 
 module.exports =
   function createScheduler(config) {
+
+    var _ = require('lodash');
+    init(config);
 
     return {
 
@@ -74,10 +77,25 @@ module.exports =
        * from 12-5, as well as stuff from 1-2 and stuff from 1:30-1.45.
        * So the correct schedule is the latest one of any that matches.
        * E.g. at 1.31, the 1.30 schedule should match.
+       *
+       * @param {()|Date|(Number, Number)} arguments
+       * 0 arguments means get current schedule
+       * 1 argument is a date
+       * 2 arguments are the hour and minute
+       *
        */
-      getSchedule: function (date) {
-        var hour   = date.getHours();   // 0 - 23
-        var minute = date.getMinutes(); // 0 - 59
+      getSchedule: function () {
+        var hour,
+            minute;
+        if (arguments.length < 2) {
+          date = arguments[0] || new Date();
+          hour   = date.getHours();
+          minute = date.getHours();
+        }
+        else {
+          hour = arguments[0];    // 0 - 23
+          minute = arguments[1];  // 0 - 59
+        }
 
         var schedule = _.chain(config.schedules)
           .where(function(schedule) {
@@ -138,6 +156,31 @@ module.exports =
     }
 
     // Private utility functions
+
+    /**
+     * A preprocessing step to convert the start/end shortcuts
+     * to start/end minute/hour properties:
+     */
+    function init(config) {
+      config.schedules.forEach(function (schedule) {
+        if (!schedule.start) {
+          throw "Schedule contains no start time";
+        }
+        if (!schedule.end) {
+          throw "Schedule contains no end time";
+        }
+        var start = schedule.start.toString().split('.');
+        var end   = schedule.end.toString().split('.');
+        schedule.start = {
+          hours: +(start[0]),
+          minutes: +(start[1])
+        };
+        schedule.end = {
+          hours: +(end[0]),
+          minutes: +(end[1])
+        };
+      });
+    }
 
     /**
      * @returns {number} Duration of the schedule in milliseconds
