@@ -52,7 +52,6 @@ describe('Schedule', function () {
   var scheduler = require('./scheduler')(config);
 
   describe('#getSchedule()', function () {
-
     it('gets the default schedule if no other schedule matches', function () {
       // The default schedule should be shown between 12.30 and 1.30
       // and before 11 and after 16:
@@ -89,6 +88,27 @@ describe('Schedule', function () {
       schedule = scheduler.getSchedule(16, 0);
       schedule.name.should.be.equal('default');
     });
-
   });
+
+  describe('#getDisplay()', function () {
+    it('shows the first display at the beginning of a schedule', function () {
+      var date = new Date('1-1-1T10:00');
+      console.log(date);
+      var display = getDisplay();
+      display.should.be.ok;
+    });
+
+    it('shows the next display when the first expires', function () {
+
+    });
+
+    it('shows the last display correctly', function () {
+
+    });
+
+    it('wraps around to the first display after the last display', function () {
+
+    });
+
+  })
 });

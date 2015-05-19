@@ -45,6 +45,7 @@ module.exports =
     return {
 
       /**
+       * @param {Date} Date for which to get the display to show
        * @returns {Object} Get the display to show right now based on the
        * schedule definition
        */
@@ -55,9 +56,9 @@ module.exports =
         // from the start time of the schedule. Note that this scheduler
         // is completely stateless by design: We do not keep a current
         // item but always calculate the correct one.
-        var time          = date.getTime();
-        var startTime     = getStartTime(date, schedule);
-        var ellapsedMs    = (time - startTime) % getScheduleLengthMs(schedule);
+        var time        = date.getTime();
+        var startTime   = getStartTime(date, schedule);
+        var ellapsedMs  = (time - startTime) % getScheduleLengthMs(schedule);
         return _.find(schedule.displays, function (display) {
           // Advance a display at a time. Note that we're assuming that we'll
           // end up inside a display because getSchedule should return a
@@ -102,11 +103,8 @@ module.exports =
 
         config.schedules.forEach(function (schedule) {
           // "Normalize" the hour/minute values for quick comparison
-          console.log(schedule.name, ':', schedule.start.hours, '.', schedule.start.minutes);
           var start = schedule.start.hours + schedule.start.minutes / 60.0;
           var end   = schedule.end.hours + schedule.end.minutes / 60.0;
-
-          console.log('t:', time, 's:', start, 'e:', end);
 
           // End time non-inclusive.
           if (time >= start && time < end) {
