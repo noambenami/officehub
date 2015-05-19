@@ -97,20 +97,33 @@ module.exports =
           minute = arguments[1];  // 0 - 59
         }
 
-        var schedule = _.chain(config.schedules)
-          .where(function (schedule) {
-            return schedule.start.hours <= hour &&
-              schedule.start.minutes <= minute &&
-              schedule.end.hours >= hour &&
-              schedule.end.minutes > minute; // End minutes non-inclusive.
-          })
-          .max(function (schedule) {
-            // Get the last of the matching schedules by converting
-            // the start time to a decimal, e.g. 13.50 for 1.30pm.
-            return schedule.start.hours + schedule.start.minutes / 60.0;
-          });
+        var time    = hour + minute / 60.0;
+        var current = null;
 
-        return schedule || config.default;
+        config.schedules.forEach(function (schedule) {
+          // "Normalize" the hour/minute values for quick comparison
+          console.log(schedule.name, ':', schedule.start.hours, '.', schedule.start.minutes);
+          var start = schedule.start.hours + schedule.start.minutes / 60.0;
+          var end   = schedule.end.hours + schedule.end.minutes / 60.0;
+
+          console.log('t:', time, 's:', start, 'e:', end);
+
+          // End time non-inclusive.
+          if (time >= start && time < end) {
+            if (!current) {
+              current = schedule;
+            } else {
+              // Get the last of the matching schedules by converting
+              // the start time to a decimal, e.g. 13.50 for 1.30pm.
+              var oldStart = current.start.hours + current.start.minutes / 60.0;
+              if (start > oldStart) {
+                current = schedule;
+              }
+            }
+          }
+        });
+
+        return current || config.default;
       }
     };
 
@@ -174,11 +187,11 @@ module.exports =
         var end   = schedule.end.toString().split('.');
         schedule.start = {
           hours: +(start[0]),
-          minutes: +(start[1])
+          minutes: +(start[1]) || 0
         };
         schedule.end = {
           hours: +(end[0]),
-          minutes: +(end[1])
+          minutes: +(end[1]) || 0
         };
       });
     }

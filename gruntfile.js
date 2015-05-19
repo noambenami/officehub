@@ -49,7 +49,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('test', [
     'jshint',
-    'jscs:all',
+   // 'jscs:all',
     'mochaTest:all'
   ]);
 };
