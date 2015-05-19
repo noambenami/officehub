@@ -1,8 +1,10 @@
+'use strict';
+
 /**
  * Launch the server.
  */
 var app           = require('express')();
-var socketServers = require('express-ws')(app);
+// var socketServers = require('express-ws')(app);
 
 app.use(function (req, res, next) {
   console.log('middleware');
@@ -10,16 +12,15 @@ app.use(function (req, res, next) {
   return next();
 });
 
-app.get('/', function(req, res, next){
+app.get('/', function (req, res, next) {
   console.log('get route', req.testing);
-  res.end();
+  next();
 });
 
 /**
  * Create a new /scheduler server
  */
-app.ws('/scheduler', function(ws, req) {
-
+app.ws('/scheduler', function (ws, req) {
   // When a client connects, we send the full schedule out
   ws.on('open', function () {
     console.log('Connection opened');
@@ -29,7 +30,7 @@ app.ws('/scheduler', function(ws, req) {
   });
 
   // TBD
-  ws.on('message', function(msg) {
+  ws.on('message', function (msg) {
     ws.send(msg);
     console.log(msg);
   });
@@ -39,6 +40,6 @@ app.ws('/scheduler', function(ws, req) {
 /**
  * To enable broadcast, we get a handle on the socket server:
  */
-var wss = socketServers.getWss('/scheduler');
+// var wss = socketServers.getWss('/scheduler');
 
 app.listen(3000);

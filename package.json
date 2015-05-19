@@ -10,20 +10,22 @@
     "url": "git://github.com/noambenami/officehub.git"
   },
   "dependencies": {
-    "express": "~4.12.3",
+    "express":    "~4.12.3",
     "express-ws": "~0.2.6",
-    "lodash": "~3.8.0",
-    "ws": "~0.7.1"
+    "lodash":     "~3.8.0",
+    "ws":         "~0.7.1"
   },
   "devDependencies": {
-    "chai": "~2.3.0",
-    "grunt-browserify": "~3.8.0",
-    "grunt-mocha-test": "~0.12.7",
-    "grunt-karma": "~0.10.1",
-    "karma": "~0.12.31",
-    "karma-chrome-launcher": "^0.1.10",
-    "karma-mocha": "^0.1.10",
-    "mocha": "~2.2.4"
+    "chai":                   "~2.3.0",
+    "grunt-browserify":       "~3.8.0",
+    "grunt-contrib-jshint":   "~0.11.2",
+    "grunt-jscs":             "~1.8.0",
+    "grunt-mocha-test":       "~0.12.7",
+    "grunt-karma":            "~0.10.1",
+    "karma":                  "~0.12.31",
+    "karma-chrome-launcher":  "^0.1.10",
+    "karma-mocha":            "^0.1.10",
+    "mocha":                  "~2.2.4"
   },
   "license": "MIT",
   "author": "Noam Ben-Ami <noam.benami@mulesoft.com>"

@@ -1,5 +1,6 @@
-module.exports = function (grunt) {
+'use strict';
 
+module.exports = function (grunt) {
   grunt.initConfig({
     browserify: {
       options: {
@@ -18,13 +19,37 @@ module.exports = function (grunt) {
         },
         src: ['client/**.spec.js']
       }
+    },
+    jscs: {
+      all: [
+        './*.js',
+        'client/**/*.js',
+        '!client/**/*.spec.js'
+      ],
+      options: {
+        config: '.jscsrc',
+        esnext: true,
+        verbose: true
+      }
+    },
+    jshint: {
+      files: ['' +
+        './*.js',
+        'client/**/*.js'
+      ],
+      options: {
+        jshintrc: true
+      }
     }
   });
 
-  grunt.loadNpmTasks('grunt-karma');
+  grunt.loadNpmTasks('grunt-contrib-jshint');
+  grunt.loadNpmTasks('grunt-jscs');
   grunt.loadNpmTasks('grunt-mocha-test');
 
   grunt.registerTask('test', [
+    'jshint',
+    'jscs:all',
     'mochaTest:all'
   ]);
 };

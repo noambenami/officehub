@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * The scheduler contains the core business logic that processes a
  * schedule: It figures out what the piece of content that should
@@ -37,7 +39,6 @@
 
 module.exports =
   function createScheduler(config) {
-
     var _ = require('lodash');
     init(config);
 
@@ -85,34 +86,32 @@ module.exports =
        *
        */
       getSchedule: function () {
-        var hour,
-            minute;
+        var hour;
+        var minute;
         if (arguments.length < 2) {
-          date = arguments[0] || new Date();
+          var date = arguments[0] || new Date();
           hour   = date.getHours();
           minute = date.getHours();
-        }
-        else {
+        } else {
           hour = arguments[0];    // 0 - 23
           minute = arguments[1];  // 0 - 59
         }
 
         var schedule = _.chain(config.schedules)
-          .where(function(schedule) {
-            return schedule.start.hours <= hour
-            && schedule.start.minutes <= minute
-            && schedule.end.hours >= hour
-            && schedule.end.minutes > minute; // End minutes non-inclusive.
+          .where(function (schedule) {
+            return schedule.start.hours <= hour &&
+              schedule.start.minutes <= minute &&
+              schedule.end.hours >= hour &&
+              schedule.end.minutes > minute; // End minutes non-inclusive.
           })
           .max(function (schedule) {
             // Get the last of the matching schedules by converting
             // the start time to a decimal, e.g. 13.50 for 1.30pm.
-            return schedule.start.hours + schedule.start.minutes/60.0;
+            return schedule.start.hours + schedule.start.minutes / 60.0;
           });
 
         return schedule || config.default;
       }
-
     };
 
     /**
@@ -120,7 +119,6 @@ module.exports =
      * time on the passed-in date;
      */
     function getStartTime(date, schedule) {
-
       // Here is the tricksy bit: The default schedule has no start time,
       // so if there are scheduled items, we use the end time of the last
       // one. If there are no scheduled items, we just use the beginning
@@ -132,10 +130,13 @@ module.exports =
       var scheduleStart = schedule.start;
       if (!scheduleStart) {
         // Default to midnight:
-        scheduleStart = { hours: 0, minutes: 0 };
+        scheduleStart = {
+          hours: 0,
+          minutes: 0
+        };
         if (config.schedules && config.schedules.length) {
           // Get the schedule with the latest display end time:
-          var lastDisplay = _.reduce(config.schedules, function(result, schedule) {
+          var lastDisplay = _.reduce(config.schedules, function (result, schedule) {
             var r = result.start;
             var s = schedule.start;
             if (s.hours > r.hours && s.minutes > r.minutes) {
@@ -164,10 +165,10 @@ module.exports =
     function init(config) {
       config.schedules.forEach(function (schedule) {
         if (!schedule.start) {
-          throw "Schedule contains no start time";
+          throw new Error('Schedule contains no start time');
         }
         if (!schedule.end) {
-          throw "Schedule contains no end time";
+          throw new Error('Schedule contains no end time');
         }
         var start = schedule.start.toString().split('.');
         var end   = schedule.end.toString().split('.');
@@ -186,9 +187,8 @@ module.exports =
      * @returns {number} Duration of the schedule in milliseconds
      */
     function getScheduleLengthMs(schedule) {
-      return _.sum(schedule.displays, function(display) {
+      return _.sum(schedule.displays, function (display) {
         return display.duration * 1000;
       });
     }
-
   };
