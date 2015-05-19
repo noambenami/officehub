@@ -10,9 +10,9 @@ describe('Schedule', function () {
     default: {
       name: 'default',
       displays: [
-        { duration: 10, url: 'a'},
-        { duration: 20, url: 'b'},
-        { duration: 50, url: 'c'}
+        { seconds: 10, url: 'a'},
+        { seconds: 20, url: 'b'},
+        { seconds: 50, url: 'c'}
       ]
     },
     schedules: [
@@ -21,9 +21,9 @@ describe('Schedule', function () {
         start: 11,
         end: 14,
         displays: [
-          { duration: 10, url: 'd'},
-          { duration: 20, url: 'e'},
-          { duration: 50, url: 'f'}
+          { seconds: 10, url: 'd'},
+          { seconds: 20, url: 'e'},
+          { seconds: 50, url: 'f'}
         ]
       },
       {
@@ -31,9 +31,9 @@ describe('Schedule', function () {
         start: '11.30',
         end: '12.30',
         displays: [
-          { duration: 10, url: 'g'},
-          { duration: 20, url: 'h'},
-          { duration: 50, url: 'i'}
+          { seconds: 10, url: 'g'},
+          { seconds: 20, url: 'h'},
+          { seconds: 50, url: 'i'}
         ]
       },
       {
@@ -41,9 +41,9 @@ describe('Schedule', function () {
         start: '13.30',
         end: 16,
         displays: [
-          { duration: 10, url: 'g'},
-          { duration: 20, url: 'h'},
-          { duration: 50, url: 'i'}
+          { seconds: 10, url: 'g'},
+          { seconds: 20, url: 'h'},
+          { seconds: 50, url: 'i'}
         ]
       }
     ]
@@ -91,11 +91,17 @@ describe('Schedule', function () {
   });
 
   describe('#getDisplay()', function () {
-    it('shows the first display at the beginning of a schedule', function () {
-      var date = new Date('1-1-1T10:00');
-      console.log(date);
-      var display = getDisplay();
-      display.should.be.ok;
+    it.only('shows the first display at the beginning of a schedule', function () {
+
+      // Show the first display in the default schedule
+      var date = new Date('January 1, 2000, 10:00');
+      var display = scheduler.getDisplay(date);
+      display.url.should.be.equal('a');
+
+      date.setSeconds(13);
+      display = scheduler.getDisplay(date);
+      display.url.should.be.equal('b');
+
     });
 
     it('shows the next display when the first expires', function () {
@@ -110,5 +116,5 @@ describe('Schedule', function () {
 
     });
 
-  })
+  });
 });

@@ -10,9 +10,9 @@
  * {
  *  default: {
  *    displays: [
- *      { url: foo, duration: 30 seconds },
- *      { markdown: bar, duration: 60 seconds, transition: fade }
- *      { html: meh, duration: 10 minutes, transition: bounce }
+ *      { url: foo, seconds: 30 seconds },
+ *      { markdown: bar, seconds: 60 seconds, transition: fade }
+ *      { html: meh, seconds: 10 minutes, transition: bounce }
  *    ]
  *  }
  *  schedules: [
@@ -21,9 +21,9 @@
  *    start: 11.30
  *    end:  13
  *    displays: [
- *      { url: foo, duration: 30 seconds },
- *      { markdown: bar, duration: 60 seconds, transition: fade }
- *      { html: meh, duration: 10 minutes, transition: bounce }
+ *      { url: foo, seconds: 30 seconds },
+ *      { markdown: bar, seconds: 60 seconds, transition: fade }
+ *      { html: meh, seconds: 10 minutes, transition: bounce }
  *    ]
  *  },
  *  ...
@@ -39,18 +39,21 @@
 
 module.exports =
   function createScheduler(config) {
-    var _ = require('lodash');
+    var self  = this;
+    var _     = require('lodash');
     init(config);
 
-    return {
+    self = {
 
       /**
-       * @param {Date} Date for which to get the display to show
+       * @param {Date} [date] Date for which to get the display to show,
+       * will be set to the current time if not provided.
        * @returns {Object} Get the display to show right now based on the
        * schedule definition
        */
       getDisplay: function (date) {
-        var schedule = this.getSchedule(date);
+        date = date || new Date();
+        var schedule = self.getSchedule(date);
 
         // Now, figure out which item to display now by "fast-forwarding"
         // from the start time of the schedule. Note that this scheduler
@@ -59,12 +62,13 @@ module.exports =
         var time        = date.getTime();
         var startTime   = getStartTime(date, schedule);
         var ellapsedMs  = (time - startTime) % getScheduleLengthMs(schedule);
+        console.log('e:', time - startTime, 'slm:', getScheduleLengthMs(schedule));
         return _.find(schedule.displays, function (display) {
           // Advance a display at a time. Note that we're assuming that we'll
           // end up inside a display because getSchedule should return a
           // schedule that we are in and because ellapsedMs has already been
           // modded against the duration of the schedule above.
-          ellapsedMs -= display.duration * 1000;
+          ellapsedMs -= display.seconds * 1000;
           if (ellapsedMs <= 0) {
             return true;
           }
@@ -125,6 +129,8 @@ module.exports =
       }
     };
 
+    return self;
+
     /**
      * @returns {number} Javascript ms time value for the schedule start
      * time on the passed-in date;
@@ -151,9 +157,9 @@ module.exports =
             var r = result.start;
             var s = schedule.start;
             if (s.hours > r.hours && s.minutes > r.minutes) {
-              return s;
+              return schedule;
             }
-            return r;
+            return result;
           }, config.schedules[0]);
 
           scheduleStart = lastDisplay.end;
@@ -162,6 +168,8 @@ module.exports =
 
       // Do not modify the passed-in date, so clone it instead
       var startDate = new Date(date.getTime());
+      FIX THIS METHOD?
+      console.log(schedule.name, 'starts at', scheduleStart.hours, ':', scheduleStart.minutes);
       startDate.setHours(scheduleStart.hours);
       startDate.setMinutes(scheduleStart.minutes);
       return startDate.getTime();
@@ -199,7 +207,7 @@ module.exports =
      */
     function getScheduleLengthMs(schedule) {
       return _.sum(schedule.displays, function (display) {
-        return display.duration * 1000;
+        return display.seconds * 1000;
       });
     }
   };
