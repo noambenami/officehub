@@ -1,0 +1,52 @@
+{
+  "default": {
+    "name": "default",
+    "displays": [
+      { "seconds": 10, "url": "a"},
+      { "seconds": 20, "url": "b"},
+      { "seconds": 50, "url": "c"}
+    ]
+  },
+  "schedules": [
+    {
+      "name": "Mid-day",
+      "start": 11,
+      "end": 14,
+      "displays": [
+        { "seconds": 10, "url": "d"},
+        { "seconds": 20, "url": "e"},
+        { "seconds": 50, "url": "f"}
+      ]
+    },
+    {
+      "name": "Lunch announcements",
+      "start": "11.30",
+      "end": "12.30",
+      "displays": [
+        { "seconds": 10, "url": "g"},
+        { "seconds": 20, "url": "h"},
+        { "seconds": 50, "url": "i"}
+      ]
+    },
+    {
+      "name": "Connect schedule and announcements",
+      "start": "13.30",
+      "end": 16,
+      "displays": [
+        { "seconds": 10, "url": "g"},
+        { "seconds": 20, "url": "h"},
+        { "seconds": 50, "url": "i"}
+      ]
+    },
+    {
+      "name": "Evening fun",
+      "start": 20,
+      "end": 22,
+      "displays": [
+        { "seconds": 10, "url": "g"},
+        { "seconds": 20, "url": "h"},
+        { "seconds": 50, "url": "i"}
+      ]
+    }
+  ]
+}
