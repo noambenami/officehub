@@ -45,6 +45,16 @@ describe('Schedule', function () {
           { seconds: 20, url: 'h'},
           { seconds: 50, url: 'i'}
         ]
+      },
+      {
+        name: 'Evening fun',
+        start: 20,
+        end: 22,
+        displays: [
+          { seconds: 10, url: 'g'},
+          { seconds: 20, url: 'h'},
+          { seconds: 50, url: 'i'}
+        ]
       }
     ]
   };
@@ -78,7 +88,7 @@ describe('Schedule', function () {
       schedule.name.should.be.equal('Connect schedule and announcements');
     });
 
-    it.only('properly handles time boundary conditions', function () {
+    it('properly handles time boundary conditions', function () {
       var schedule = scheduler.getSchedule(13, 30);
       schedule.name.should.be.equal('Connect schedule and announcements');
 
@@ -91,20 +101,19 @@ describe('Schedule', function () {
   });
 
   describe('#getDisplay()', function () {
-    it.only('shows the first display at the beginning of a schedule', function () {
 
+    var date = new Date('January 1, 2000, 10:00');
+
+    it('shows the first display at the beginning of a schedule', function () {
       // Show the first display in the default schedule
-      var date = new Date('January 1, 2000, 10:00');
       var display = scheduler.getDisplay(date);
       display.url.should.be.equal('a');
-
-      date.setSeconds(13);
-      display = scheduler.getDisplay(date);
-      display.url.should.be.equal('b');
-
     });
 
     it('shows the next display when the first expires', function () {
+      date.setSeconds(13);
+      var display = scheduler.getDisplay(date);
+      display.url.should.be.equal('b');
 
     });
 

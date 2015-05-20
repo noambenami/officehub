@@ -62,7 +62,7 @@ module.exports =
         var time        = date.getTime();
         var startTime   = getStartTime(date, schedule);
         var ellapsedMs  = (time - startTime) % getScheduleLengthMs(schedule);
-        console.log('e:', time - startTime, 'slm:', getScheduleLengthMs(schedule));
+
         return _.find(schedule.displays, function (display) {
           // Advance a display at a time. Note that we're assuming that we'll
           // end up inside a display because getSchedule should return a
@@ -136,30 +136,25 @@ module.exports =
      * time on the passed-in date;
      */
     function getStartTime(date, schedule) {
-      // Here is the tricksy bit: The default schedule has no start time,
-      // so if there are scheduled items, we use the end time of the last
-      // one. If there are no scheduled items, we just use the beginning
-      // of the day. This way, we get a consistent display item for the
-      // default schedule.
-      //
+      // The default schedule does not have a pre-defined start time since
+      // it could start/stop based on space available within non-contiguous
+      // schedules. So, given a time, we need to go backwards until we find
+      // a schedule and return that schedule's end time as the start time
+
       // Note that we do not cache any values to enable schedules to be
-      // easily mutable and to avoid side effects.
+      // easily mutable and to avoid side effects. This enables clients
+      // to be restarted and remain in sync with all other clients.
       var scheduleStart = schedule.start;
       if (!scheduleStart) {
-        // Default to midnight:
-        scheduleStart = {
-          hours: 0,
-          minutes: 0
-        };
         if (config.schedules && config.schedules.length) {
           // Get the schedule with the latest display end time:
-          var lastDisplay = _.reduce(config.schedules, function (result, schedule) {
-            var r = result.start;
+          var lastDisplay = _.reduce(config.schedules, function (latestSchedule, schedule) {
+            var l = latestSchedule.start;
             var s = schedule.start;
-            if (s.hours > r.hours && s.minutes > r.minutes) {
+            if (s.hours > l.hours && s.minutes > l.minutes) {
               return schedule;
             }
-            return result;
+            return latestSchedule;
           }, config.schedules[0]);
 
           scheduleStart = lastDisplay.end;
@@ -168,10 +163,19 @@ module.exports =
 
       // Do not modify the passed-in date, so clone it instead
       var startDate = new Date(date.getTime());
-      FIX THIS METHOD?
-      console.log(schedule.name, 'starts at', scheduleStart.hours, ':', scheduleStart.minutes);
       startDate.setHours(scheduleStart.hours);
       startDate.setMinutes(scheduleStart.minutes);
+
+      // If the start time of the default schedule is computed to be in the future,
+      // then we just use midnight as the start time:
+      if (date.getTime() < startDate.getTime()) {
+        startDate.setHours(0);
+        startDate.setMinutes(0);
+      }
+
+      // All schedules always start at 0 seconds
+      startDate.setSeconds(0);
+
       return startDate.getTime();
     }
 
