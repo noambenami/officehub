@@ -43,13 +43,19 @@ module.exports = function (grunt) {
     }
   });
 
+  grunt.loadNpmTasks('grunt-browserify');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-jscs');
   grunt.loadNpmTasks('grunt-mocha-test');
 
   grunt.registerTask('test', [
     'jshint',
-   // 'jscs:all',
+    'jscs:all',
     'mochaTest:all'
+  ]);
+
+  grunt.registerTask('build', [
+    'test',
+    'browserify'
   ]);
 };
