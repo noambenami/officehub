@@ -98,13 +98,14 @@ describe('Schedule', function () {
       schedule = scheduler.getSchedule(16, 0);
       schedule.name.should.be.equal('default');
     });
+
   });
 
   describe('#getDisplay()', function () {
 
     var date = new Date('January 1, 2000, 10:00');
 
-    it('shows the first display at the beginning of a schedule', function () {
+    it('shows the first display at the beginning of the default schedule', function () {
       // Show the first display in the default schedule
       var display = scheduler.getDisplay(date);
       display.url.should.be.equal('a');
@@ -118,11 +119,23 @@ describe('Schedule', function () {
     });
 
     it('shows the last display correctly', function () {
-
+      date.setSeconds(50);
+      var display = scheduler.getDisplay(date);
+      display.url.should.be.equal('c');
     });
 
     it('wraps around to the first display after the last display', function () {
+      date.setMinutes(1);
+      date.setSeconds(25);
+      var display = scheduler.getDisplay(date);
+      display.url.should.be.equal('a');
+    });
 
+    it('finds the correct non-default schedule display', function () {
+      date = new Date('January 1, 2000, 11:00');
+
+      var display = scheduler.getDisplay(date);
+      display.url.should.be.equal('d');
     });
 
   });
