@@ -2,25 +2,25 @@
 
 require('chai').should();
 
-describe('Schedule', function () {
+describe('Scheduler', function () {
   // Test schedule. Contains two default time spans,
   // as well as both partly overlapping and contained
   // schedules.
   var config = {
     default: {
       name: 'default',
-      displays: [
+      items: [
         { seconds: 10, url: 'a'},
         { seconds: 20, url: 'b'},
         { seconds: 50, url: 'c'}
       ]
     },
-    schedules: [
+    events: [
       {
         name: 'Mid-day',
         start: 11,
         end: 14,
-        displays: [
+        items: [
           { seconds: 10, url: 'd'},
           { seconds: 20, url: 'e'},
           { seconds: 50, url: 'f'}
@@ -30,7 +30,7 @@ describe('Schedule', function () {
         name: 'Lunch announcements',
         start: '11.30',
         end: '12.30',
-        displays: [
+        items: [
           { seconds: 10, url: 'g'},
           { seconds: 20, url: 'h'},
           { seconds: 50, url: 'i'}
@@ -40,7 +40,7 @@ describe('Schedule', function () {
         name: 'Connect schedule and announcements',
         start: '13.30',
         end: 16,
-        displays: [
+        items: [
           { seconds: 10, url: 'g'},
           { seconds: 20, url: 'h'},
           { seconds: 50, url: 'i'}
@@ -50,7 +50,7 @@ describe('Schedule', function () {
         name: 'Evening fun',
         start: 20,
         end: 22,
-        displays: [
+        items: [
           { seconds: 10, url: 'g'},
           { seconds: 20, url: 'h'},
           { seconds: 50, url: 'i'}
@@ -61,42 +61,42 @@ describe('Schedule', function () {
 
   var scheduler = require('./scheduler')(config);
 
-  describe('#getSchedule()', function () {
+  describe('#getEvent()', function () {
     it('gets the default schedule if no other schedule matches', function () {
       // The default schedule should be shown between 12.30 and 1.30
       // and before 11 and after 16:
-      var schedule = scheduler.getSchedule(10, 0);
-      schedule.name.should.be.equal('default');
+      var event = scheduler.getEvent(10, 0);
+      event.name.should.be.equal('default');
 
-      schedule = scheduler.getSchedule(16, 0);
-      schedule.name.should.be.equal('default');
+      event = scheduler.getEvent(16, 0);
+      event.name.should.be.equal('default');
     });
 
     it('gets a specific schedule if only one matches', function () {
-      var schedule = scheduler.getSchedule(11, 0);
-      schedule.name.should.be.equal('Mid-day');
+      var event = scheduler.getEvent(11, 0);
+      event.name.should.be.equal('Mid-day');
 
-      schedule = scheduler.getSchedule(12, 45);
-      schedule.name.should.be.equal('Mid-day');
+      event = scheduler.getEvent(12, 45);
+      event.name.should.be.equal('Mid-day');
     });
 
     it('gets the latest specific schedule if more than one matches', function () {
-      var schedule = scheduler.getSchedule(12, 25);
-      schedule.name.should.be.equal('Lunch announcements');
+      var event = scheduler.getEvent(12, 25);
+      event.name.should.be.equal('Lunch announcements');
 
-      schedule = scheduler.getSchedule(14, 0);
-      schedule.name.should.be.equal('Connect schedule and announcements');
+      event = scheduler.getEvent(14, 0);
+      event.name.should.be.equal('Connect schedule and announcements');
     });
 
     it('properly handles time boundary conditions', function () {
-      var schedule = scheduler.getSchedule(13, 30);
-      schedule.name.should.be.equal('Connect schedule and announcements');
+      var event = scheduler.getEvent(13, 30);
+      event.name.should.be.equal('Connect schedule and announcements');
 
-      schedule = scheduler.getSchedule(15, 59);
-      schedule.name.should.be.equal('Connect schedule and announcements');
+      event = scheduler.getEvent(15, 59);
+      event.name.should.be.equal('Connect schedule and announcements');
 
-      schedule = scheduler.getSchedule(16, 0);
-      schedule.name.should.be.equal('default');
+      event = scheduler.getEvent(16, 0);
+      event.name.should.be.equal('default');
     });
 
   });

@@ -1,26 +1,26 @@
 'use strict';
 
 /**
- * The scheduler contains the core business logic that processes a
- * schedule: It figures out what the piece of content that should
- * be shown next based on the data in the schedule.
+ * The schedule rcontains the core business logic that processes a
+ * event: It figures out what the piece of content that should
+ * be shown next based on the data in the event.
  *
- * A schedule configuration looks like this. Note that the default schedule
+ * A event configuration looks like this. Note that the default event
  * does not have nor need a start/end time.
  * {
  *  default: {
- *    displays: [
+ *    items: [
  *      { url: foo, seconds: 30 seconds },
  *      { markdown: bar, seconds: 60 seconds, transition: fade }
  *      { html: meh, seconds: 10 minutes, transition: bounce }
  *    ]
  *  }
- *  schedules: [
+ *  events: [
  *  {
  *    name: "lunch announcements"
  *    start: 11.30
  *    end:  13
- *    displays: [
+ *    items: [
  *      { url: foo, seconds: 30 seconds },
  *      { markdown: bar, seconds: 60 seconds, transition: fade }
  *      { html: meh, seconds: 10 minutes, transition: bounce }
@@ -30,15 +30,15 @@
  *  ]
  * }
  * The policy is as follows:
- * 1. Look for a schedule that matches the current time. If no schedule is found, use the default.
+ * 1. Look for a event that matches the current time. If no event is found, use the default.
  * 2. Show the first item.
  * 3. On timeout, increment current item duration and switch to next item if it expires.
- *      Expiration is the first of item duration ending or schedule end time arriving.
- * 4. When out of items in the current schedule, move to next schedule or back to default.
+ *      Expiration is the first of item duration ending or event end time arriving.
+ * 4. When out of items in the current event, move to next event or back to default.
  */
 
 module.exports =
-  function createScheduler(config) {
+  function createSchedule(config) {
     var self  = this;
     var _     = require('lodash');
     init(config);
@@ -49,25 +49,25 @@ module.exports =
        * @param {Date} [date] Date for which to get the display to show,
        * will be set to the current time if not provided.
        * @returns {Object} Get the display to show right now based on the
-       * schedule definition
+       * event definition
        */
       getDisplay: function (date) {
         date = date || new Date();
-        var schedule = self.getSchedule(date);
+        var event = self.getEvent(date);
 
         // Now, figure out which item to display now by "fast-forwarding"
-        // from the start time of the schedule. Note that this scheduler
+        // from the start time of the event. Note that this scheduler
         // is completely stateless by design: We do not keep a current
         // item but always calculate the correct one.
         var time        = date.getTime();
-        var startTime   = getStartTime(date, schedule);
-        var ellapsedMs  = (time - startTime) % getScheduleLengthMs(schedule);
+        var startTime   = getStartTime(date, event);
+        var ellapsedMs  = (time - startTime) % getEventLengthMs(event);
 
-        return _.find(schedule.displays, function (display) {
+        return _.find(event.items, function (display) {
           // Advance a display at a time. Note that we're assuming that we'll
-          // end up inside a display because getSchedule should return a
-          // schedule that we are in and because ellapsedMs has already been
-          // modded against the duration of the schedule above.
+          // end up inside a display because getEvent should return a
+          // event that we are in and because ellapsedMs has already been
+          // modded against the duration of the event above.
           ellapsedMs -= display.seconds * 1000;
           if (ellapsedMs <= 0) {
             return true;
@@ -76,21 +76,21 @@ module.exports =
       },
 
       /**
-       * Get the schedule at the given time. If no schedule is defined
-       * for the given time, will return the default schedule.
+       * Get the event at the given time. If no event is defined
+       * for the given time, will return the default event.
        *
-       * Now, note that schedules can be nested, so we can schedule stuff
+       * Now, note that events can be nested, so we can event stuff
        * from 12-5, as well as stuff from 1-2 and stuff from 1:30-1.45.
-       * So the correct schedule is the latest one of any that matches.
-       * E.g. at 1.31, the 1.30 schedule should match.
+       * So the correct event is the latest one of any that matches.
+       * E.g. at 1.31, the 1.30 event should match.
        *
        * @param {()|Date|(Number, Number)} arguments
-       * 0 arguments means get current schedule
+       * 0 arguments means get current event
        * 1 argument is a date
        * 2 arguments are the hour and minute
        *
        */
-      getSchedule: function () {
+      getEvent: function () {
         var hour;
         var minute;
         if (arguments.length < 2) {
@@ -105,21 +105,21 @@ module.exports =
         var time    = hour + minute / 60.0;
         var current = null;
 
-        config.schedules.forEach(function (schedule) {
+        config.events.forEach(function (event) {
           // "Normalize" the hour/minute values for quick comparison
-          var start = schedule.start.hours + schedule.start.minutes / 60.0;
-          var end   = schedule.end.hours + schedule.end.minutes / 60.0;
+          var start = event.start.hours + event.start.minutes / 60.0;
+          var end   = event.end.hours + event.end.minutes / 60.0;
 
           // End time non-inclusive.
           if (time >= start && time < end) {
             if (!current) {
-              current = schedule;
+              current = event;
             } else {
-              // Get the last of the matching schedules by converting
+              // Get the last of the matching events by converting
               // the start time to a decimal, e.g. 13.50 for 1.30pm.
               var oldStart = current.start.hours + current.start.minutes / 60.0;
               if (start > oldStart) {
-                current = schedule;
+                current = event;
               }
             }
           }
@@ -132,48 +132,48 @@ module.exports =
     return self;
 
     /**
-     * @returns {number} Javascript ms time value for the schedule start
+     * @returns {number} Javascript ms time value for the event start
      * time on the passed-in date;
      */
-    function getStartTime(date, schedule) {
-      // The default schedule does not have a pre-defined start time since
+    function getStartTime(date, event) {
+      // The default event does not have a pre-defined start time since
       // it could start/stop based on space available within non-contiguous
-      // schedules. So, given a time, we need to go backwards until we find
-      // a schedule and return that schedule's end time as the start time
+      // events. So, given a time, we need to go backwards until we find
+      // a event and return that event's end time as the start time
 
-      // Note that we do not cache any values to enable schedules to be
+      // Note that we do not cache any values to enable events to be
       // easily mutable and to avoid side effects. This enables clients
       // to be restarted and remain in sync with all other clients.
-      var scheduleStart = schedule.start;
-      if (!scheduleStart) {
-        if (config.schedules && config.schedules.length) {
-          // Get the schedule with the latest display end time:
-          var lastDisplay = _.reduce(config.schedules, function (latestSchedule, schedule) {
-            var l = latestSchedule.start;
-            var s = schedule.start;
+      var eventStart = event.start;
+      if (!eventStart) {
+        if (config.events && config.events.length) {
+          // Get the event with the latest display end time:
+          var lastDisplay = _.reduce(config.events, function (latestEvent, event) {
+            var l = latestEvent.start;
+            var s = event.start;
             if (s.hours > l.hours && s.minutes > l.minutes) {
-              return schedule;
+              return event;
             }
-            return latestSchedule;
-          }, config.schedules[0]);
+            return latestEvent;
+          }, config.events[0]);
 
-          scheduleStart = lastDisplay.end;
+          eventStart = lastDisplay.end;
         }
       }
 
       // Do not modify the passed-in date, so clone it instead
       var startDate = new Date(date.getTime());
-      startDate.setHours(scheduleStart.hours);
-      startDate.setMinutes(scheduleStart.minutes);
+      startDate.setHours(eventStart.hours);
+      startDate.setMinutes(eventStart.minutes);
 
-      // If the start time of the default schedule is computed to be in the future,
+      // If the start time of the default event is computed to be in the future,
       // then we just use midnight as the start time:
       if (date.getTime() < startDate.getTime()) {
         startDate.setHours(0);
         startDate.setMinutes(0);
       }
 
-      // All schedules always start at 0 seconds
+      // All events always start at 0 seconds
       startDate.setSeconds(0);
 
       return startDate.getTime();
@@ -186,20 +186,20 @@ module.exports =
      * to start/end minute/hour properties:
      */
     function init(config) {
-      config.schedules.forEach(function (schedule) {
-        if (!schedule.start) {
-          throw new Error('Schedule contains no start time');
+      config.events.forEach(function (event) {
+        if (!event.start) {
+          throw new Error('Event contains no start time');
         }
-        if (!schedule.end) {
-          throw new Error('Schedule contains no end time');
+        if (!event.end) {
+          throw new Error('Event contains no end time');
         }
-        var start = schedule.start.toString().split('.');
-        var end   = schedule.end.toString().split('.');
-        schedule.start = {
+        var start = event.start.toString().split('.');
+        var end   = event.end.toString().split('.');
+        event.start = {
           hours: +(start[0]),
           minutes: +(start[1]) || 0
         };
-        schedule.end = {
+        event.end = {
           hours: +(end[0]),
           minutes: +(end[1]) || 0
         };
@@ -207,10 +207,10 @@ module.exports =
     }
 
     /**
-     * @returns {number} Duration of the schedule in milliseconds
+     * @returns {number} Duration of the event in milliseconds
      */
-    function getScheduleLengthMs(schedule) {
-      return _.sum(schedule.displays, function (display) {
+    function getEventLengthMs(event) {
+      return _.sum(event.items, function (display) {
         return display.seconds * 1000;
       });
     }

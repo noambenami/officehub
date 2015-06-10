@@ -17,14 +17,16 @@ module.exports = function (grunt) {
           reporter: 'spec',
           quiet: false
         },
-        src: ['client/**.spec.js']
+        src: ['client/**.spec.js', 'server/**.spec.js']
       }
     },
     jscs: {
       all: [
         './*.js',
         'client/**/*.js',
-        '!client/**/*.spec.js'
+        '!client/**/*.spec.js',
+        'server/**/*.js',
+        '!server/**/*.spec.js'
       ],
       options: {
         config: '.jscsrc',
@@ -35,7 +37,8 @@ module.exports = function (grunt) {
     jshint: {
       files: ['' +
         './*.js',
-        'client/**/*.js'
+        'client/**/*.js',
+        'server/**/*.js'
       ],
       options: {
         jshintrc: true

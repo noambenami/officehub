@@ -1,8 +1,9 @@
 'use strict';
 
-module.exports = function() {
-  var fs            = require('fs');
-  var scheduleFile  = __dirname + '/store/schedule.json';
+var scheduleFile  = __dirname + '/store/schedule.json';
+var fs            = require('fs');
+
+module.exports = function () {
 
   var self = {
 
