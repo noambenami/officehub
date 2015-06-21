@@ -1,25 +1,30 @@
 'use strict';
 
+var path = require('path');
+
 module.exports = function (grunt) {
   grunt.initConfig({
+    // Create browser versions of our client-side modules
     browserify: {
       options: {
         debug: true
       },
       dev: {
         src: ['client/scheduler.js'],
-        dest: 'build/bundle.js'
+        dest: 'content/scripts/bundle.js'
       }
     },
+    // Test modules
     mochaTest: {
       all: {
         options: {
           reporter: 'spec',
           quiet: false
         },
-        src: ['client/**.spec.js', 'server/**.spec.js']
+        src: ['client/**/*.spec.js', 'server/**/*.spec.js']
       }
     },
+    // Code formatting enforcement
     jscs: {
       all: [
         './*.js',
@@ -34,6 +39,7 @@ module.exports = function (grunt) {
         verbose: true
       }
     },
+    // Code linting
     jshint: {
       files: ['' +
         './*.js',
@@ -43,11 +49,23 @@ module.exports = function (grunt) {
       options: {
         jshintrc: true
       }
+    },
+    // Launch the node server
+    express: {
+      server: {
+        server:       path.resolve(__dirname, 'server.js'),
+        bases:        path.resolve(__dirname, 'content'),
+        livereload:   true,
+        serverreload: true,
+        showStack:    true
+      }
     }
   });
 
   grunt.loadNpmTasks('grunt-browserify');
+  grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-jshint');
+  grunt.loadNpmTasks('grunt-express');
   grunt.loadNpmTasks('grunt-jscs');
   grunt.loadNpmTasks('grunt-mocha-test');
 
@@ -59,6 +77,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('build', [
     'test',
-    'browserify'
+    'browserify',
+    'copy:client'
   ]);
 };

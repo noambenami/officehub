@@ -29,8 +29,10 @@ describe.only('filesystemScheduleFactory', function () {
         e2.end.should.be.equal('21.15');
         e2.name.should.be.equal('bar');
         e2.items.length.should.be.equal(2);
-        e2.items[0].url.should.be.equal('img2.jpg');
-        e2.items[1].url.should.be.equal('img3.jpg');
+        e2.items[0].url.should.be.equal('img2-5.jpg');
+        e2.items[1].url.should.be.equal('img3-7.jpg');
+        e2.items[0].seconds.should.be.equal(5);
+        e2.items[1].seconds.should.be.equal(7);
         console.log(JSON.stringify(schedules, null, 2));
       });
   });

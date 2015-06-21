@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+  <meta charset="UTF-8">
+  <title>Officehub</title>
+</head>
+<style>
+  #wrapper img { width: 100%; }
+  #wrapper .invisible { display: none; }
+</style>
+<body>
+<div id="wrapper">
+  <img src="../server/store/SF/1-2 - foo/img1.jpg">
+  <img class="invisible" src="../server/store/SF/17-21.15 - bar/img2.jpg">
+  <img class="invisible" src="../server/store/SF/17-21.15 - bar/img3.jpg">
+</div>
+</body>
+<script src="../bower_components/jquery/dist/jquery.min.js"></script>
+<script src="../bower_components/jquery-ui/jquery-ui.min.js"></script>
+<script>
+  $(function () {
+    var target    = '#wrapper #img';
+    var effect    = 'scale';
+    var options   = { effect: 'isInOutQuint '};
+    var duration  = 1000;
+    showNext(1);
+
+    function showNext(i) {
+      $(target + i).hide(effect, options, duration, function () {
+        showNext(++i);
+      });
+
+    }
+  })
+</script>
+</html>

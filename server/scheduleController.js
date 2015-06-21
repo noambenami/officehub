@@ -1,33 +1,31 @@
 'use strict';
 
-var scheduleFile  = __dirname + '/store/schedule.json';
-var fs            = require('fs');
-
+/**
+ * Implements a simple REST endpoint that provides access to the dynamically
+ * generated schedules for the various offices.
+ */
 module.exports = function () {
+
+  var schedules = require('./filesystemScheduleFactory');
 
   var self = {
 
+    /**
+     * Searches for the office specified in the request office parameter and
+     * writes the response into the response body. Will return a 404 if the
+     * office is not found.
+     */
     get: function (req, res) {
-      fs.readFile(scheduleFile, function (err, data) {
-        var response = data || {};
-        res.json(response);
-      });
-    },
+      var office = req.params.office;
 
-    post: function (req, res) {
-      // validate
-      try {
-        var schedule = JSON.parse(req.body);
-        fs.writeFile(scheduleFile, JSON.stringify(schedule, null, 2), function (err) {
-          if (err) {
-            return res.sendStatus(500);
+      schedules.get(office)
+        .then(function (schedule) {
+          if (!schedule) {
+            res.sendStatus(404);
+            return;
           }
-          res.sendStatus(200);
+          res.send(schedule);
         });
-      } catch (e) {
-        // Malformed request
-        res.sendStatus(400);
-      }
     }
 
   };

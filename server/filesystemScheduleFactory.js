@@ -2,13 +2,13 @@
 
 var BPromise  = require('bluebird');
 var fs        = BPromise.promisifyAll(require('fs'));
-var storePath = __dirname + '/store/';
+var storePath = __dirname + '/../content/offices/';
 
 /**
  * Runs through the files in the store. Each top level folder represents a schedule for a
  * particular office. Each office folder represents a schedule, with folders named for the
  * schedule timing. Each item in each folder becomes a scheduled item. Items have a name
- * and a postfix specifying how long they are to be displayed, e.g. 'lunch_60' will be
+ * and a postfix specifying how long they are to be displayed, e.g. 'lunch-60' will be
  * shown for 60 seconds. If no time is specified, 1 minute is the default. Items are
  * sorted in ascending alphabetical order.
  *
@@ -19,11 +19,11 @@ module.exports = function () {
   var self = {
 
     /**
-     * @param {String} location Name of folder to look in, e.g. 'Sydney'
+     * @param {String} office Name of folder to look in, e.g. 'Sydney'
      * @returns {Promise} Promise for the given schedule. Will resolve with
-     * null if the location is not a folder in the store
+     * null if the office is not a folder in the store
      */
-    get: function (location) {
+    get: function (office) {
       var schedule = {
         // jscs: disable disallowQuotedKeysInObjects
         'default': null,
@@ -31,21 +31,21 @@ module.exports = function () {
         events: []
       };
 
-      // For security, we list the files in the store and match up to the passed-in location
+      // For security, we list the files in the store and match up to the passed-in office
       // so that we never take user input and pass it to fs directly.
       return fs.readdirAsync(storePath)
         .then(function (files) {
-          if (files.indexOf(location) === -1) {
+          if (files.indexOf(office) === -1) {
             // Folder does not exist
             return null;
           }
-          location = storePath + location;
-          return fs.readdirAsync(location);
+          office = storePath + office;
+          return fs.readdirAsync(office);
         })
         .then(function (folders) {
           // Each folder represents a scheduled items list
           var promises = folders.map(function (folder) {
-            return buildEvent(location, folder);
+            return buildEvent(office, folder);
           });
           return BPromise.all(promises);
         })
@@ -83,7 +83,8 @@ module.exports = function () {
       event = {
         start:  components[0].trim(),
         end:    components[1].trim(),
-        name:   (components[2] && components[2].trim()) || 'No Name'
+        name:   (components[2] && components[2].trim()) || 'No Name',
+        folder: folder
       };
     }
 
@@ -95,9 +96,10 @@ module.exports = function () {
         files.sort();
         event.items = files.map(function (file) {
           var components = file.split('-');
+          var seconds = components[1] && +(components[1].split('.')[0]);  // parse 5 out of '5.jpg'
           return {
-            url: file,   // We will process this into a url later
-            seconds: components[1]
+            url:      file,   // We will process this into a url later
+            seconds:  seconds || 60
           };
         });
 
