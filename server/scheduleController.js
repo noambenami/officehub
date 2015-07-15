@@ -1,14 +1,12 @@
 'use strict';
 
+var schedules = require('./filesystemScheduleFactory');
+
 /**
  * Implements a simple REST endpoint that provides access to the dynamically
  * generated schedules for the various offices.
  */
-module.exports = function () {
-
-  var schedules = require('./filesystemScheduleFactory');
-
-  var self = {
+module.exports = {
 
     /**
      * Searches for the office specified in the request office parameter and
@@ -16,6 +14,7 @@ module.exports = function () {
      * office is not found.
      */
     get: function (req, res) {
+
       var office = req.params.office;
 
       schedules.get(office)
@@ -29,7 +28,3 @@ module.exports = function () {
     }
 
   };
-
-  return self;
-
-};

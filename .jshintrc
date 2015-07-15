@@ -1,6 +1,5 @@
 {
   "node":          true,
-
   "bitwise":       true,
   "boss":          true,
   "camelcase":     true,
@@ -32,12 +31,16 @@
 
   "overrides": {
     "**/*.spec.js": {
-      "mocha":  true,
+      "mocha": true,
       "globals": {
         "should":   false,
         "describe": false,
         "it":       false
       }
+    },
+    "client/index.js": {
+      "browser":  true,
+      "devel":    true
     }
   }
 }

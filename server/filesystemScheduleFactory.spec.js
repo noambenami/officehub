@@ -1,7 +1,7 @@
 'use strict';
 
 require('chai').should();
-var factory   = require('./filesystemScheduleFactory')();
+var factory   = require('./filesystemScheduleFactory');
 var BPromise  = require('bluebird');
 
 describe.only('filesystemScheduleFactory', function () {

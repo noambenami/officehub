@@ -11,10 +11,12 @@
   },
   "dependencies": {
     "bluebird":     "2.9.24",
-    "express":      "~4.12.3",
-    "express-ws":   "~0.2.6",
-    "lodash":       "~3.8.0",
-    "ws":           "~0.7.1"
+    "express":      "4.12.3",
+    "express-ws":   "0.2.6",
+    "jquery":       "2.1.4",
+    "jquery-ui":    "1.10.5",
+    "lodash":       "3.8.0",
+    "ws":           "0.7.1"
   },
   "devDependencies": {
     "chai":                   "~2.3.0",

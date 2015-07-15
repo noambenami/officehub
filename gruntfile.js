@@ -10,7 +10,7 @@ module.exports = function (grunt) {
         debug: true
       },
       dev: {
-        src: ['client/scheduler.js'],
+        src: ['client/index.js'],
         dest: 'content/scripts/bundle.js'
       }
     },
@@ -77,7 +77,6 @@ module.exports = function (grunt) {
 
   grunt.registerTask('build', [
     'test',
-    'browserify',
-    'copy:client'
+    'browserify'
   ]);
 };

@@ -15,5 +15,5 @@ Grunt is required to run tests/spin up the server, et cetera.
 Karma is the test framework. In case you need to run it manually
  sudo npm install -g karma-cli
  
-Run npm install to get all server-s-de dependencies
+Run npm install to get all server-side dependencies
  npm install

@@ -14,9 +14,7 @@ var storePath = __dirname + '/../content/offices/';
  *
  * @returns {Object} Schedule built from the filesystem files
  */
-module.exports = function () {
-
-  var self = {
+module.exports = {
 
     /**
      * @param {String} office Name of folder to look in, e.g. 'Sydney'
@@ -37,7 +35,7 @@ module.exports = function () {
         .then(function (files) {
           if (files.indexOf(office) === -1) {
             // Folder does not exist
-            return null;
+            throw new Error(office + ' does not exist');
           }
           office = storePath + office;
           return fs.readdirAsync(office);
@@ -59,6 +57,9 @@ module.exports = function () {
             }
           });
           return schedule;
+        })
+        .catch(function (err) {
+          return null;
         });
     }
 
@@ -106,7 +107,3 @@ module.exports = function () {
         return event;
       });
   }
-
-  return self;
-
-};
